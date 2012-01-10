@@ -803,6 +803,23 @@ def xml_to_print(guest, continue_inst, xmlonly, xmlstep, dry):
 # CLI option handling #
 #######################
 
+def get_defaults(configfile="/etc/virtinst/defaults.conf"):
+    "Get default parameters from configfile if they exist"
+    defaults = {}
+    try:
+        f = open( configfile )
+        for line in f.readlines():
+            tmp = line.split(None,1)
+            if len(tmp) != 2: continue
+            key,value = tmp
+            defaults[key] = value.strip()
+    except:
+        # Fail silently if file is not found.
+        pass
+    return defaults
+
+
+
 def parse_args():
     usage = "%prog --name NAME --ram RAM STORAGE INSTALL [options]"
     parser = cli.setupParser(usage)
@@ -959,6 +976,11 @@ def parse_args():
     misc.add_option("-d", "--debug", action="store_true", dest="debug",
                     help=_("Print debugging information"))
     parser.add_option_group(misc)
+
+    # Get defaults from configuration file
+    defaults = get_defaults()
+    for item,value in defaults.items():
+        parser.defaults[item] = value
 
     (options, cliargs) = parser.parse_args()
     return options, cliargs
